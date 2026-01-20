@@ -30,7 +30,7 @@ flowchart LR
     classDef client fill:#555,stroke:#fff,stroke-width:2px,color:#fff;
 
     %% Nós Principais
-    Client(Load Test / JMeter):::client
+    Client(Load Test):::client
     API[mega-api]:::service
     Worker[mega-worker]:::service
     
