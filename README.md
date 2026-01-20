@@ -21,47 +21,48 @@ O projeto foi modularizado para garantir reutilização de código e gestão cen
 A solução utiliza o padrão Microservices com configuração externalizada.
 
 ```mermaid
-flowchart TD
-    %% Infraestrutura
+flowchart LR
+    %% Estilos (High Contrast para Dark/Light Mode)
+    classDef service fill:#326ce5,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef infra fill:#f08c00,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef db fill:#2f9e44,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef lib fill:#e03131,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef client fill:#555,stroke:#fff,stroke-width:2px,color:#fff;
+
+    %% Nós Principais
+    Client(Load Test / JMeter):::client
+    API[mega-api]:::service
+    Worker[mega-worker]:::service
+    
+    %% Banco de Dados e Brokers
+    Redis[(Redis)]:::db
+    Kafka[(Kafka)]:::db
+    Postgres[(PostgreSQL)]:::db
+
+    %% Infra e Libs (Auxiliares)
     Config[mega-config-server]:::infra
-    
-    %% Clients
-    Client(Load Test / JMeter) -- "HTTP POST (High Concurrency)" --> API
-    
-    %% Services
-    subgraph "Service Mesh"
-        direction TB
-        Common((mega-common)):::lib
-        API[mega-api]:::service
-        Worker[mega-worker]:::service
-    end
+    Common((mega-common)):::lib
 
-    %% Dependências
-    API -.-> Config
-    Worker -.-> Config
-    API --- Common
-    Worker --- Common
-
-    %% Broker Layer
-    subgraph "Broker Layer (Buffer)"
-        direction TB
-        Redis[(Redis List)]:::db
-        Kafka[(Apache Kafka)]:::db
-    end
+    %% --- FLUXO PRINCIPAL ---
+    Client -- "HTTP POST (20k RPS)" --> API
     
-    %% Fluxo de Dados
-    API -- "Strategy A (Sync)" --> Redis
-    API -- "Strategy B (Async)" --> Kafka
+    %% Estratégias
+    API -- "Strategy A" --> Redis
+    API -- "Strategy B" --> Kafka
     
+    %% Consumo
     Redis --> Worker
     Kafka --> Worker
     
-    Worker -- "Batch Insert" --> DB[(PostgreSQL)]:::db
+    %% Persistência
+    Worker -- "Batch Insert" --> Postgres
 
-    classDef infra fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef service fill:#bbf,stroke:#333,stroke-width:2px;
-    classDef lib fill:#ff9,stroke:#333,stroke-width:2px;
-    classDef db fill:#dfd,stroke:#333,stroke-width:2px;
+    %% --- DEPENDÊNCIAS (Linhas Pontilhadas) ---
+    Config -.-> API
+    Config -.-> Worker
+    
+    Common -.-> API
+    Common -.-> Worker
 ```
 
 ## 🛠️ Tech Stack & Otimizações
