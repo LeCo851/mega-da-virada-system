@@ -1,0 +1,10 @@
+server:
+  port: 8081
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: mega-worker-group
+      auto-offset-reset: earliest
+      max-poll-records: 500 #processa 500 apostas por vez

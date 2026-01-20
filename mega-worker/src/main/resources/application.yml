@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: mega-worker
+  config:
+    # O 'optional' é importante aqui para os testes não quebrarem se o server estiver off
+    import: "optional:configserver:http://localhost:8888/"
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000
+
+  cloud:
+    config:
+      fail-fast: false # Não derruba o app se o config server demorar a responder
+
+  # --- CONFIGURAÇÃO DO BANCO DE DADOS
+  datasource:
+    url: jdbc:postgresql://localhost:5433/mega_db?reWriteBatchedInserts=true
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  # Configurações do Hibernate (JPA)
+  jpa:
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 500
+        order_inserts: true
+    hibernate:
+      ddl-auto: update # Cria as tabelas automaticamente baseadas nas classes
+    show-sql: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus" # Libera a URL /actuator/prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true # Cria histogramas para ver latência p95/p99
+  prometheus:
+     metrics:
+      export:
+        enabled: true
+server:
+  port: 9090

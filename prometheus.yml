@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 2s
+
+scrape_configs:
+  - job_name: 'mega-api'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+        labels:
+          application: 'Mega API'
+
+  - job_name: 'mega-worker'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:9090']
+        labels:
+          application: 'Mega Worker'
+
+  - job_name: 'redis'
+    static_configs: # <--- Alinhado com o 'j' de job_name acima
+      - targets: ['redis-exporter:9121']
